@@ -1,4 +1,4 @@
-"""Orquestração: extrai, transforma e salva as tabelas do painel."""
+"""Orquestração: extrai, transforma, salva e carrega as tabelas do painel."""
 
 from pathlib import Path
 
@@ -6,6 +6,7 @@ import pandas as pd
 
 from painel_vendas_ecommerce.config import END_DATE, PROCESSED_DIR, START_DATE
 from painel_vendas_ecommerce.extract import read_raw_table
+from painel_vendas_ecommerce.load import get_database_url, load_tables
 from painel_vendas_ecommerce.transform import (
     aggregate_items_by_order,
     build_items_fact,
@@ -44,3 +45,5 @@ def main() -> None:
     tables = build_tables()
     for path in save_tables(tables):
         print(f"Salvo: {path} ({len(tables[path.stem])} linhas)")
+    load_tables(tables, get_database_url())
+    print("Carga no banco concluída.")
