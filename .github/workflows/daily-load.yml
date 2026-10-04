@@ -1,0 +1,39 @@
+name: Carga diária do painel
+
+on:
+  schedule:
+    # Minuto 17 para fugir do pico do início da hora. 09:17 UTC = 06:17 em Brasília.
+    - cron: "17 9 * * *"
+  workflow_dispatch: # botão "Run workflow" para rodar manualmente
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-load
+  cancel-in-progress: false
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v5
+
+      - name: Instalar o uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Instalar Python e dependências
+        run: uv sync --locked
+
+      - name: Rodar testes
+        run: uv run pytest
+
+      - name: Rodar o pipeline (extract, transform, load)
+        run: uv run painel-vendas-ecommerce
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

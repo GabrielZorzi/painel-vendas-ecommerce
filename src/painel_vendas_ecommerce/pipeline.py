@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from painel_vendas_ecommerce.config import END_DATE, PROCESSED_DIR, START_DATE
-from painel_vendas_ecommerce.extract import read_raw_table
+from painel_vendas_ecommerce.extract import download_raw_data, read_raw_table
 from painel_vendas_ecommerce.load import get_database_url, load_tables
 from painel_vendas_ecommerce.transform import (
     aggregate_items_by_order,
@@ -42,6 +42,8 @@ def save_tables(tables: dict[str, pd.DataFrame], out_dir: Path = PROCESSED_DIR) 
 
 
 def main() -> None:
+    if download_raw_data():
+        print("Dataset baixado do Kaggle.")
     tables = build_tables()
     for path in save_tables(tables):
         print(f"Salvo: {path} ({len(tables[path.stem])} linhas)")
